@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataMinds | Interactive Company Overview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 
+    Chosen Palette: Deep Navy, Gold, and White (from DataMinds_Logo.jpg via wix_prompt.txt)
+    Application Structure Plan: A single-page application with a sticky header and smooth-scrolling navigation. The structure is thematic, matching the logical sections of the wix_prompt.txt file: Hero, Solutions, Products, Audience, and Contact. This allows a user to get a full overview of the company in a single flow. Interactions (toggles for solutions, tabs for products) are designed to reveal detailed information on demand, preventing overwhelming the user with text. This structure is chosen for its clarity and for being the most effective way to present a company summary interactively.
+    Visualization & Content Choices: 
+    - Report Info: Core Value Prop/Tagline -> Goal: Inform -> Viz/Presentation: Hero Section (HTML/Tailwind) -> Interaction: None -> Justification: High-impact introduction.
+    - Report Info: Key Metrics Placeholders (99.9%, 150+) -> Goal: Inform/Trust -> Viz/Presentation: Key Stat Cards (HTML/Tailwind) -> Interaction: None -> Justification: Breaks out key numbers for quick visibility.
+    - Report Info: Solutions (BI, Data, AI) & their sub-services -> Goal: Organize/Inform -> Viz/Presentation: Interactive Cards (HTML/Tailwind) -> Interaction: On-click toggle to show/hide sub-service list (JS) -> Justification: Manages information density, allowing users to explore only the services they're interested in without cluttering the page.
+    - Report Info: Products (Governance, Agent, Dashboard) -> Goal: Compare/Inform -> Viz/Presentation: Tabbed Interface (HTML/Tailwind) -> Interaction: On-click tab switching to show product details (JS) -> Justification: Standard, user-friendly UI for comparing distinct product offerings.
+    - Report Info: Target Audience -> Goal: Inform -> Viz/Presentation: Styled List/Grid (HTML/Tailwind) -> Interaction: None -> Justification: Simple, clear presentation of target personas.
+    - Report Info: Contact Form Details -> Goal: Action -> Viz/Presentation: Form Layout (HTML/Tailwind) -> Interaction: Form field dropdown -> Justification: Directly implements the required lead-gen function.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        :root {
+            --color-primary: #071E3D; /* Deep Navy Blue (from logo) */
+            --color-accent: #FFB800; /* Muted Corporate Gold (from logo) */
+            --color-text-light: #F4F4F4;
+            --color-text-dark: #212121;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-primary);
+            color: var(--color-text-light);
+        }
+        .nav-link {
+            @apply px-4 py-2 text-sm font-medium text-gray-300 rounded-md hover:text-white hover:bg-white/10 transition-colors;
+        }
+        .section-title {
+            @apply text-3xl font-bold tracking-tight text-white sm:text-4xl;
+        }
+        .section-subtitle {
+            @apply mt-2 text-lg leading-8 text-gray-300;
+        }
+        .card {
+            @apply bg-white/5 p-6 rounded-lg shadow-lg backdrop-blur-sm transition-all duration-300;
+        }
+        .tab-btn {
+            @apply px-6 py-3 text-lg font-medium rounded-t-lg transition-colors;
+        }
+        .tab-btn.active {
+            @apply bg-gray-800 text-white;
+        }
+        .tab-btn.inactive {
+            @apply text-gray-400 hover:text-white hover:bg-white/5;
+        }
+        .tab-panel {
+            @apply bg-gray-800 p-6 rounded-b-lg rounded-tr-lg;
+        }
+        .toggle-card.active {
+            @apply ring-2 ring-inset ring-amber-400;
+        }
+        .toggle-content {
+            @apply transition-all duration-500 ease-in-out;
+        }
+        .btn-primary {
+            @apply inline-block rounded-md bg-amber-500 px-6 py-3 text-base font-semibold text-gray-900 shadow-sm hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 transition-colors;
+        }
+        .form-input {
+            @apply block w-full rounded-md border-0 bg-white/10 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-amber-500 sm:text-sm sm:leading-6;
+        }
+        /* Custom styling for prose within AI output */
+        #response-content {
+            white-space: pre-line; /* Handle newlines for cleaner display of LLM markdown */
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-100">
+
+    <!-- Header & Navigation -->
+    <header class="bg-gray-900/80 backdrop-blur-md sticky top-0 z-50">
+        <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <!-- Logo integration -->
+                        <img 
+                            src="resources/images/DataMinds_Logo.jpg" 
+                            alt="DataMinds Logo: Half brain circuit icon with DataMinds text"
+                            class="h-8 w-auto"
+                            onerror="this.style.display='none'; this.closest('.flex-shrink-0').innerHTML = '<span class=\'text-2xl font-bold text-white\'>DataMinds</span>';"
+                        >
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link">Home</a>
+                        <a href="#solutions" class="nav-link">Solutions</a>
+                        <a href="#products" class="nav-link">Products</a>
+                        <a href="#about" class="nav-link">About</a>
+                        <a href="#contact" class="nav-link bg-amber-500 text-gray-900 hover:bg-amber-400 hover:text-gray-900">Request Demo</a>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-btn" type="button" class="inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                        <svg class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
+                <a href="#home" class="nav-link block">Home</a>
+                <a href="#solutions" class="nav-link block">Solutions</a>
+                <a href="#products" class="nav-link block">Products</a>
+                <a href="#about" class="nav-link block">About</a>
+                <a href="#contact" class="nav-link block bg-amber-500 text-gray-900 hover:bg-amber-400 hover:text-gray-900">Request Demo</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Hero Section -->
+        <section id="home" class="py-24 sm:py-32">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl">
+                    From Data Overload to Intelligent Action
+                </h1>
+                <p class="mt-6 text-xl leading-8 text-gray-300">
+                    <span class="font-semibold text-amber-400">DataMinds</span> empowers enterprise leaders to build meaningful, measurable business intelligence through expert data strategy, advanced analytics, and responsible AI.
+                </p>
+                <p class="mt-4 text-lg text-gray-400">Tagline: Empowering Intelligence Through Data.</p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    <a href="#contact" class="btn-primary">Request a Demo</a>
+                    <a href="#solutions" class="text-sm font-semibold leading-6 text-white">Learn more <span aria-hidden="true">→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="py-16 sm:py-24">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+                <div class="card text-center">
+                    <div class="text-5xl font-bold text-amber-400">99.9%</div>
+                    <p class="mt-2 text-lg font-medium text-gray-300">Data Accuracy</p>
+                    <p class="mt-1 text-sm text-gray-400">Placeholder for key metric on data quality and governance impact.</p>
+                </div>
+                <div class="card text-center">
+                    <div class="text-5xl font-bold text-amber-400">150+</div>
+                    <p class="mt-2 text-lg font-medium text-gray-300">Successful Deployments</p>
+                    <p class="mt-1 text-sm text-gray-400">Placeholder for project volume and enterprise experience.</p>
+                </div>
+                <div class="card text-center">
+                    <div class="text-5xl font-bold text-amber-400">24/7</div>
+                    <p class="mt-2 text-lg font-medium text-gray-300">Expert Support</p>
+                    <p class="mt-1 text-sm text-gray-400">Placeholder for our commitment to client success and support.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Solutions Section -->
+        <section id="solutions" class="py-16 sm:py-24">
+            <div class="max-w-2xl mx-auto text-center">
+                <span class="text-base font-semibold leading-7 text-amber-400">Our Expertise</span>
+                <h2 class="section-title">Core Solutions</h2>
+                <p class="section-subtitle">
+                    This section details our three main service pillars. Click on any card to explore the specific solutions we provide within that category. This interactive format helps you find exactly what you need.
+                </p>
+            </div>
+            <div class="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3" id="solutions-grid">
+                <!-- Solution Card 1 -->
+                <div class="toggle-card card" data-toggle-id="sol-bi">
+                    <h3 class="text-2xl font-semibold text-amber-400">Business Intelligence & Analytics</h3>
+                    <p class="mt-2 text-gray-400">Uncover insights and predict outcomes. Click to see details.</p>
+                    <div id="sol-bi" class="toggle-content mt-4 hidden">
+                        <ul class="list-disc list-inside space-y-2 text-gray-300">
+                            <li>Supply Chain Optimization & Analysis</li>
+                            <li>Next Best Product Recommendation Engines</li>
+                            <li>Customer Churn Prediction</li>
+                            <li>Financial Forecasting & Budgeting Automation</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Solution Card 2 -->
+                <div class="toggle-card card" data-toggle-id="sol-data">
+                    <h3 class="text-2xl font-semibold text-amber-400">Data Strategy & Engineering</h3>
+                    <p class="mt-2 text-gray-400">Build a rock-solid data foundation. Click to see details.</p>
+                    <div id="sol-data" class="toggle-content mt-4 hidden">
+                        <ul class="list-disc list-inside space-y-2 text-gray-300">
+                            <li>Scalable Data Pipelines (ETL/ELT)</li>
+                            <li>Enterprise Data Modeling (Warehouse/Mart)</li>
+                            <li>Data Quality & Governance Frameworks</li>
+                            <li>Cloud Data Platform Migration (Snowflake, etc.)</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Solution Card 3 -->
+                <div class="toggle-card card" data-toggle-id="sol-ai">
+                    <h3 class="text-2xl font-semibold text-amber-400">AI & Machine Learning</h3>
+                    <p class="mt-2 text-gray-400">Automate and innovate with AI. Click to see details.</p>
+                    <div id="sol-ai" class="toggle-content mt-4 hidden">
+                        <ul class="list-disc list-inside space-y-2 text-gray-300">
+                            <li>AI-Based Document Analysis & Extraction</li>
+                            <li>Agentic Automation (Smart Workflows)</li>
+                            <li>Predictive Maintenance Models</li>
+                            <li>Generative AI for Executive Summaries</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- NEW: AI Recommendation CTA -->
+            <div class="mt-16 text-center pt-8 border-t border-white/10">
+                <p class="text-lg font-semibold text-gray-300 mb-4">Unsure where to start? Let our AI consultant help.</p>
+                <button id="ai-recommend-btn" class="btn-primary flex items-center justify-center mx-auto hover:ring-2 hover:ring-amber-500 hover:ring-offset-2 hover:ring-offset-gray-900">
+                    <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a8 8 0 00-8 8c0 2.253.966 4.312 2.658 5.766L10 20l4.342-4.234A8 8 0 0018 10a8 8 0 00-8-8zm0 14a6 6 0 110-12 6 6 0 010 12zM9 8a1 1 0 100 2h2a1 1 0 100-2H9z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    <span class="text-gray-900 font-bold">✨ AI Solution Recommender</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Interactive Products Section -->
+        <section id="products" class="py-16 sm:py-24">
+            <div class="max-w-2xl mx-auto text-center">
+                <span class="text-base font-semibold leading-7 text-amber-400">Our Products</span>
+                <h2 class="section-title">Turnkey Solutions</h2>
+                <p class="section-subtitle">
+                    Explore our core product offerings. This tabbed interface allows you to switch between our main platforms to understand their features and how they fit into our tiered pricing.
+                </p>
+            </div>
+            <div class="mt-16 max-w-3xl mx-auto">
+                <div class="flex border-b border-gray-700" id="product-tabs">
+                    <button class="tab-btn active" data-tab-target="prod-gov">Data Governance Suite</button>
+                    <button class="tab-btn inactive" data-tab-target="prod-agent">AI Agent Platform</button>
+                    <button class="tab-btn inactive" data-tab-target="prod-dash">Analytics Dashboard</button>
+                </div>
+                <div id="product-panels">
+                    <div id="prod-gov" class="tab-panel">
+                        <h3 class="text-xl font-semibold text-white">Data Governance Suite</h3>
+                        <p class="mt-2 text-gray-300">A comprehensive solution for maintaining data quality, lineage, and access control across your enterprise. Ensure compliance and trust in your data.</p>
+                        <p class="mt-4 text-sm text-gray-400">Available in Starter, Professional, and Enterprise tiers. <a href="#contact" class="font-medium text-amber-400 hover:text-amber-300">Request Quote & Product Deep Dive &rarr;</a></p>
+                    </div>
+                    <div id="prod-agent" class="tab-panel hidden">
+                        <h3 class="text-xl font-semibold text-white">AI Agent Orchestration Platform</h3>
+                        <p class="mt-2 text-gray-300">Deploy, manage, and monitor intelligent agents to automate complex business workflows. From document analysis to smart orchestration, scale your operations with AI.</p>
+                        <p class="mt-4 text-sm text-gray-400">Available in Professional and Enterprise tiers. <a href="#contact" class="font-medium text-amber-400 hover:text-amber-300">Request Quote & Product Deep Dive &rarr;</a></a</p>
+                    </div>
+                    <div id="prod-dash" class="tab-panel hidden">
+                        <h3 class="text-xl font-semibold text-white">Real-Time Analytics Dashboard</h3>
+                        <p class="mt-2 text-gray-300">A plug-and-play BI solution providing real-time insights for key verticals like supply chain and customer churn. Get instant visibility into your most critical metrics.</p>
+                        <p class="mt-4 text-sm text-gray-400">Starts at a monthly rate, with custom options available. <a href="#contact" class="font-medium text-amber-400 hover:text-amber-300">Request Quote & Product Deep Dive &rarr;</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About / Audience Section -->
+        <section id="about" class="py-16 sm:py-24">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                <div>
+                    <span class="text-base font-semibold leading-7 text-amber-400">Who We Are</span>
+                    <h2 class="section-title">Expertise & Methodology</h2>
+                    <p class="mt-4 text-lg text-gray-300">
+                        We are more than consultants; we are your strategic partners in data transformation. Our methodology is built on a commitment to ethical AI and providing senior technical expertise to solve your most complex challenges. We establish thought leadership by delivering measurable results, not just reports.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold text-amber-400">Our Target Audience</h3>
+                    <p class="mt-2 text-gray-400">We partner with technical and operational leaders in mid-to-large enterprises:</p>
+                    <ul class="mt-4 space-y-2 text-gray-300">
+                        <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-amber-500 mr-3"></span>CIOs & CTOs</li>
+                        <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-amber-500 mr-3"></span>Chief Data Officers (CDOs)</li>
+                        <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-amber-500 mr-3"></span>VPs of Operations & Supply Chain</li>
+                        <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-amber-500 mr-3"></span>Senior Technical Decision-Makers</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-16 sm:py-24">
+            <div class="max-w-2xl mx-auto text-center">
+                <span class="text-base font-semibold leading-7 text-amber-400">Get Started</span>
+                <h2 class="section-title">Request a Demo or Support</h2>
+                <p class="section-subtitle">
+                    Ready to transform your data? Use this form to connect with our team. Select your inquiry type, and we'll route your request to the right expert.
+                </p>
+            </div>
+            <form id="contact-form" class="mx-auto mt-16 max-w-xl sm:mt-20">
+                <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <label for="name" class="block text-sm font-semibold leading-6 text-white">Name</label>
+                        <div class="mt-2.5">
+                            <input type="text" id="name" class="form-input" placeholder="Your Name">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="company" class="block text-sm font-semibold leading-6 text-white">Company</label>
+                        <div class="mt-2.5">
+                            <input type="text" id="company" class="form-input" placeholder="Your Company">
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="email" class="block text-sm font-semibold leading-6 text-white">Email</label>
+                        <div class="mt-2.5">
+                            <input type="email" id="email" class="form-input" placeholder="your.email@company.com">
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="inquiry-type" class="block text-sm font-semibold leading-6 text-white">Inquiry Type</label>
+                        <div class="mt-2.5">
+                            <select id="inquiry-type" class="form-input">
+                                <option>Request a Demo</option>
+                                <option>General Inquiry</option>
+                                <option>Support</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="message" class="block text-sm font-semibold leading-6 text-white">Message</label>
+                        <div class="mt-2.5">
+                            <textarea id="message" rows="4" class="form-input" placeholder="Tell us about your needs..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-10">
+                    <button type="submit" class="btn-primary w-full">Send Message</button>
+                    <p id="form-message" class="mt-4 text-center text-green-400 hidden"></p>
+                </div>
+            </form>
+        </section>
+    </main>
+    
+    <!-- AI Recommendation Modal -->
+    <div id="recommendation-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden z-[100] items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-amber-500/30">
+            <div class="flex justify-between items-start">
+                <h3 class="text-2xl font-bold text-white flex items-center">
+                    <span class="text-amber-500 mr-2">✨</span> AI Solution Recommender
+                </h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <p class="mt-4 text-gray-300">Describe your primary business challenge or data problem below, and our AI consultant will recommend the best DataMinds solution for you.</p>
+
+            <textarea id="problem-input" rows="4" class="form-input mt-4 resize-none" placeholder="E.g., We need to reduce customer churn by 10% and our current data is messy."></textarea>
+
+            <button id="generate-recommendation-btn" class="btn-primary w-full mt-4 flex items-center justify-center">
+                Get Recommendation
+            </button>
+
+            <div id="recommendation-output" class="mt-6 p-4 bg-gray-900 rounded-lg hidden">
+                <p class="text-sm font-semibold text-amber-400 mb-2">AI Consultant Response:</p>
+                <div id="loading-spinner" class="hidden text-center">
+                    <div class="animate-spin inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full"></div>
+                    <p class="mt-2 text-gray-400">Analyzing your challenge...</p>
+                </div>
+                <div id="response-content" class="text-gray-200 text-sm">
+                    <!-- AI recommendation text goes here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-white/10">
+        <div class="mx-auto max-w-7xl overflow-hidden px-6 py-12 lg:px-8">
+            <p class="text-center text-xs leading-5 text-gray-400">
+                &copy; 2025 DataMinds. All rights reserved. Empowering Intelligence Through Data.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Gemini API Configuration ---
+        const apiKey = ""; // API key is provided by the environment
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        // Helper for exponential backoff during API calls
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        async function fetchWithBackoff(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status === 429 && i < maxRetries - 1) {
+                        const waitTime = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        await delay(waitTime);
+                        continue;
+                    }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    const waitTime = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await delay(waitTime);
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const svgs = menuBtn.querySelectorAll('svg');
+
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                svgs[0].classList.toggle('hidden');
+                svgs[1].classList.toggle('hidden');
+            });
+
+            // Close mobile menu on nav link click
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    svgs[0].classList.remove('hidden');
+                    svgs[1].classList.add('hidden');
+                });
+            });
+
+            // Smooth Scroll for all hash links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Interactive Solution Card Toggle
+            const solutionCards = document.querySelectorAll('.toggle-card');
+            solutionCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const contentId = card.dataset.toggleId;
+                    const content = document.getElementById(contentId);
+                    
+                    if (content.classList.contains('hidden')) {
+                        // Close all others
+                        document.querySelectorAll('.toggle-content').forEach(tc => {
+                            if (!tc.classList.contains('hidden')) {
+                                tc.classList.add('hidden');
+                                tc.style.maxHeight = null;
+                            }
+                        });
+                        document.querySelectorAll('.toggle-card').forEach(c => {
+                            c.classList.remove('active');
+                        });
+
+                        // Open this one
+                        card.classList.add('active');
+                        content.classList.remove('hidden');
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    } else {
+                        // Close this one
+                        card.classList.remove('active');
+                        content.classList.add('hidden');
+                        content.style.maxHeight = null;
+                    }
+                });
+            });
+
+            // Product Tab Switching
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.tabTarget;
+
+                    // Update buttons
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.classList.add('inactive');
+                    });
+                    button.classList.add('active');
+                    button.classList.remove('inactive');
+
+                    // Update panels
+                    tabPanels.forEach(panel => {
+                        if (panel.id === targetId) {
+                            panel.classList.remove('hidden');
+                        } else {
+                            panel.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            // Contact Form Submission
+            const contactForm = document.getElementById('contact-form');
+            const formMessage = document.getElementById('form-message');
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                formMessage.textContent = 'Thank you for your message! We will be in touch soon.';
+                formMessage.classList.remove('hidden');
+                contactForm.reset();
+
+                setTimeout(() => {
+                    formMessage.classList.add('hidden');
+                }, 5000);
+            });
+
+
+            // --- Gemini AI Recommendation Feature ---
+            const modal = document.getElementById('recommendation-modal');
+            const openBtn = document.getElementById('ai-recommend-btn');
+            const closeBtn = document.getElementById('close-modal-btn');
+            const generateBtn = document.getElementById('generate-recommendation-btn');
+            const inputField = document.getElementById('problem-input');
+            const outputContainer = document.getElementById('recommendation-output');
+            const responseContent = document.getElementById('response-content');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
+            // Modal Visibility
+            openBtn.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                inputField.value = '';
+                outputContainer.classList.add('hidden');
+                responseContent.innerHTML = '';
+                generateBtn.textContent = 'Get Recommendation';
+                generateBtn.disabled = false;
+            });
+
+            closeBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+
+            // Recommendation Generation
+            generateBtn.addEventListener('click', generateRecommendation);
+
+            async function generateRecommendation() {
+                const userQuery = inputField.value.trim();
+
+                if (!userQuery) {
+                    // Custom message box instead of alert()
+                    responseContent.innerHTML = '<p class="text-red-400">Please describe your business challenge before proceeding.</p>';
+                    outputContainer.classList.remove('hidden');
+                    return;
+                }
+
+                // Show loading state
+                outputContainer.classList.remove('hidden');
+                loadingSpinner.classList.remove('hidden');
+                responseContent.innerHTML = '';
+                generateBtn.disabled = true;
+                generateBtn.textContent = 'Analyzing...';
+
+                const systemPrompt = `You are a Senior AI Consultant for DataMinds, a data and AI consulting firm. Your goal is to analyze the user's brief description of their business problem and recommend the single best-fit core solution from the list below.
+
+Core Solutions:
+1. Business Intelligence & Analytics: Focused on reporting, forecasting, and prediction (e.g., churn, supply chain).
+2. Data Strategy & Engineering: Focused on building data foundations, quality, and cloud migration (ETL/ELT, Governance).
+3. AI & Machine Learning: Focused on automation, agentic workflows, and deploying sophisticated predictive models.
+
+Structure your response clearly:
+1. Start with a confident, brief introduction acknowledging the challenge.
+2. Clearly state your primary recommendation (e.g., "We recommend focusing on **[Solution Name]**").
+3. Justify the choice based on the user's input.
+4. End with a short, encouraging call-to-action to book a full consultation.
+Use friendly, professional Markdown formatting (bolding, lists, etc.) and avoid markdown headers (##).`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                const options = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                };
+
+                try {
+                    const response = await fetchWithBackoff(apiUrl, options);
+                    const result = await response.json();
+                    
+                    // Simple replacement for basic markdown-like display of the LLM output
+                    let generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || 
+                                         "I apologize, I was unable to generate a recommendation at this time. Please try again or contact us directly.";
+
+                    generatedText = generatedText
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                        .replace(/\n/g, '<br>'); // Newlines
+
+                    responseContent.innerHTML = generatedText;
+
+                } catch (error) {
+                    console.error('Gemini API Error:', error);
+                    responseContent.innerHTML = '<p class="text-red-400">An API error occurred. Please check the console for details or try again shortly.</p>';
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = 'Get Recommendation';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
